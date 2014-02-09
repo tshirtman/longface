@@ -27,6 +27,7 @@ except ImportError:
     exit()
 
 import os
+import shutil
 
 
 parser = plyj.Parser()
@@ -162,7 +163,7 @@ if __name__ == '__main__':
         *arguments.get('<packagename>', '').split('.'))
 
     if arguments.get('--cleanup'):
-        os.rmdir(outpath)
+        shutil.rmtree(outpath)
 
     suffix = arguments.get('<suffix>', '')
 
