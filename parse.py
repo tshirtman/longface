@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 '''
 Usage:
-    parse.py <path> <exportpath> <suffix> [<packagename>] [--blacklist=<blacklist>] [--debug]
-    parse.py --jar=<jarfile> <exportpath> [<packagename>] --suffix=<suffix> [--blacklist=<blacklist>] [--debug]
+    parse.py <path> <exportpath> <suffix> [<packagename>] [--blacklist=<blacklist>] [--debug] [--cleanup]
+    parse.py --jar=<jarfile> <exportpath> [<packagename>] --suffix=<suffix> [--blacklist=<blacklist>] [--debug] [--cleanup]
 
 Options:
     path                        is the path to look java classes into
@@ -12,6 +12,7 @@ Options:
     -j --jar=<jarfile>          used to look for classes in a jar instead of a path
     -b --blacklist=<blacklist>  indicate a file to filter packages/imports from
     -d --debug                  display more info about what happens
+    -c --cleanup                remove old content of exportpath before starting
 '''
 
 # TODO
@@ -159,6 +160,9 @@ if __name__ == '__main__':
     outpath = os.path.join(
         arguments['<exportpath>'],
         *arguments.get('<packagename>', '').split('.'))
+
+    if arguments.get('--cleanup'):
+        os.rmdir(outpath)
 
     suffix = arguments.get('<suffix>', '')
 
