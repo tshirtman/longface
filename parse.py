@@ -18,6 +18,23 @@ Options:
 # TODO
 # handling jars
 
+blacklist = [
+    "com.android.internal",
+    "android.os",
+    "android.util.LongSparseArray",
+    "android.widget.RemoteViews.OnClickHandler",
+    "com.android.tools.layoutlib.create",
+    "org.objectweb",
+    "com.android.test",
+    "com.google.android.util",
+    "com.google.mockwebserver",
+    "libcore.javax.net.ssl",
+    "android.view.accessibility",
+    "dalvik.system",
+    "com.android.ide.common",
+    "com.android.layoutlib.bridge",
+]
+
 try:
     import plyj.parser as plyj
     import jinja2
@@ -115,28 +132,33 @@ def get_abstract_classes(path, blacklist):
     """
     for path, _, files in os.walk(path):
         for f in files:
-            if f.endswith('.java'):
-                j = parser.parse_file(file(os.path.join(path, f)))
+            if not f.endswith('.java'):
+                continue
+
+            j = parser.parse_file(file(os.path.join(path, f)))
+            if debug:
+                print "parsing %s" % os.path.join(path, f)
+
+            if not j:
+                continue
+
+            if j.package_declaration:
                 if debug:
-                    print "parsing %s" % os.path.join(path, f)
-                if j:
-                    if j.package_declaration:
-                        if debug:
-                            print "package %s" % j.package_declaration.name.value
+                    print "package %s" % j.package_declaration.name.value
 
-                        if in_blacklist(j.package_declaration.name.value, blacklist):
-                            if debug:
-                                print "skipping package %s because it's blacklisted" % j.package_declaration.name.value
-                            continue
+                if in_blacklist(j.package_declaration.name.value, blacklist):
+                    if debug:
+                        print "skipping package %s because it's blacklisted" % j.package_declaration.name.value
+                    continue
 
-                    for tp in j.type_declarations:
-                        if (
-                            tp and 'public' in tp.modifiers and
-                            'abstract' in tp.modifiers
-                        ):
-                            if debug:
-                                print "found abstract class %s in %s" % (tp.name, j.package_declaration)
-                            yield j, tp
+            for tp in j.type_declarations:
+                if (
+                    tp and 'public' in tp.modifiers and
+                    'abstract' in tp.modifiers
+                ):
+                    if debug:
+                        print "found abstract class %s in %s" % (tp.name, j.package_declaration)
+                    yield j, tp
 
 
 def get_abstract_methods(tp):
@@ -173,11 +195,8 @@ if __name__ == '__main__':
     blacklistfile = arguments.get('--blacklist')
     if blacklistfile:
         with open(blacklistfile) as f:
-            blacklist = list(l[:-1] for l in f.readlines())
+            blacklist.extend(list(l[:-1] for l in f.readlines()))
             print "blacklist: %s" % ';'.join(blacklist)
-
-    else:
-        blacklist = []
 
     for module, cls in get_abstract_classes(arguments['<path>'], blacklist):
         methods = list(get_abstract_methods(cls))
