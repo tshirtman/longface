@@ -1,18 +1,22 @@
 #!/usr/bin/env python
 '''
 Usage:
-    parse.py <path> <exportpath> <suffix> [<packagename>] [--blacklist=<blacklist>] [--debug] [--cleanup]
-    parse.py --jar=<jarfile> <exportpath> [<packagename>] --suffix=<suffix> [--blacklist=<blacklist>] [--debug] [--cleanup]
+    parse.py <path> <exportpath> <suffix> [<packagename>]
+        [--blacklist=<blacklist>] [--debug] [--cleanup]
+    parse.py --jar=<jarfile> <exportpath> [<packagename>]
+        --suffix=<suffix> [--blacklist=<blacklist>] [--debug] [--cleanup]
 
 Options:
     path                        is the path to look java classes into
     exportpath                  is the destination dir to produce classes into
-    packagename                 is an optional package name to put in the generated
-                                classe files
-    -j --jar=<jarfile>          used to look for classes in a jar instead of a path
+    packagename                 is an optional package name to put in
+                                the generated classe files
+    -j --jar=<jarfile>          used to look for classes in a jar
+                                instead of a path
     -b --blacklist=<blacklist>  indicate a file to filter packages/imports from
     -d --debug                  display more info about what happens
-    -c --cleanup                remove old content of exportpath before starting
+    -c --cleanup                remove old content of exportpath before
+                                starting
 '''
 
 # TODO
@@ -148,7 +152,8 @@ def get_abstract_classes(path, blacklist):
 
                 if in_blacklist(j.package_declaration.name.value, blacklist):
                     if debug:
-                        print "skipping package %s because it's blacklisted" % j.package_declaration.name.value
+                        print "skipping package %s because it's blacklisted" % (
+                            j.package_declaration.name.value)
                     continue
 
             for tp in j.type_declarations:
@@ -157,7 +162,8 @@ def get_abstract_classes(path, blacklist):
                     'abstract' in tp.modifiers
                 ):
                     if debug:
-                        print "found abstract class %s in %s" % (tp.name, j.package_declaration)
+                        print "found abstract class %s in %s" % (
+                            tp.name, j.package_declaration)
                     yield j, tp
 
 
